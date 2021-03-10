@@ -1,0 +1,148 @@
+<!doctype html> 
+<html lang="en"> 
+<head> 
+    <meta charset="UTF-8" />
+    <title>Outter Snail</title>
+    <script src="//cdn.jsdelivr.net/npm/phaser@3.11.0/dist/phaser.js"></script>
+    <style type="text/css">
+        body {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+<script type="text/javascript">
+
+    var config = {
+        type: Phaser.AUTO,
+        width: 800,
+        height: 600,
+        physics: {
+            default: 'arcade',
+            arcade: {
+                gravity: { y: 300 },
+                debug: false
+            }
+        },
+        scene: {
+            preload: preload,
+            create: create,
+            update: update
+        }
+    };
+
+    var player;
+    var balls;
+    var platforms;
+    var cursors;
+    
+    var jump;
+    
+    var doubleSaut = false;
+    var verifSaut = true;
+    
+    // Panel de valeur
+    
+    var HauterDeSaut = 330;
+    
+    
+    
+    
+    
+    
+    var game = new Phaser.Game(config);
+
+    function preload ()
+    {
+        this.load.image('sky', 'assets/sky.png');
+        this.load.image('ground', 'assets/platform.png');
+        this.load.spritesheet('dude', 'assets/escargot.png', { frameWidth: 54, frameHeight: 27 });
+    }
+
+    function create ()
+    {
+        this.add.image(400, 300, 'sky');
+
+        platforms = this.physics.add.staticGroup();
+        centre = this.physics.add.staticGroup();
+
+        platforms.create(400, 568, 'ground').setScale(2).refreshBody();
+        platforms.create(400, 32, 'ground').setScale(2).refreshBody();
+        
+        
+        
+        // joueur 1
+        player = this.physics.add.sprite(100, 450, 'dude');
+        player.setBounce(0.2);
+        player.setCollideWorldBounds(true);
+
+        cursors = this.input.keyboard.createCursorKeys();
+
+        
+        // Score
+        jumpText = this.add.text(30, 15, ('jump = '+ verifSaut), { fontSize: '20px', fill: '#000' });
+        doublejumpText = this.add.text(30, 32, ('doublejump = '+ doubleSaut), { fontSize: '20px', fill: '#000' });
+        // Collider et Overlap
+        this.physics.add.collider(player, platforms, jumpRefresh);
+       
+        this.physics.add.overlap(player, centre,);
+    }
+
+    function update ()
+    {  
+    // Gravité 
+        if (player.y >= 300){
+            player.setGravityY(300);
+            jump = - HauterDeSaut
+        }
+        if (player.y < 300){
+            player.setGravityY(-900);
+            jump = HauterDeSaut
+        }
+              
+    // Deplacement
+        
+        // Gauche
+        if (cursors.left.isDown)  {
+            player.setVelocityX(-260);
+        }
+        
+        //Droite
+        else if (cursors.right.isDown){
+            player.setVelocityX(260);
+        }
+        
+        //Kill du momentum
+        else{
+            player.setVelocityX(0);
+        }
+    
+        //Saut   
+        if (cursors.up.isDown && verifSaut == true){
+            verifSaut = false
+            player.setVelocityY(jump);
+            jumpText.setText('jump = '+ verifSaut);
+            }  
+        
+        if (cursors.up.onUp && verifSaut == false){
+            doubleSaut = true
+        }
+        
+        if (cursors.up.isDown && verifSaut == false && doubleSaut == true)
+            player.setVelocityY(jump);
+            doubleSaut = false
+        }      
+    function jumpRefresh (player, platforms)
+    {
+        verifSaut = true;
+        jumpText.setText('jump = '+ verifSaut);
+        doublejumpText.setText('doublejump = '+ doubleSaut);
+
+        
+    }
+       
+</script>
+
+</body>
+</html>
