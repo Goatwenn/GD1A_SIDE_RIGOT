@@ -31,7 +31,10 @@
             update: update
         }
     };
-
+    
+// Variable ____________________________________________
+    
+    
     var player;
     var balls;
     var platforms;
@@ -39,20 +42,28 @@
     
     var jump;
     
+    var doubleSautFait = false;
     var doubleSaut = false;
     var verifSaut = true;
     
-    // Panel de valeur
-    
-    var HauterDeSaut = 330;
-    
-    
-    
-    
-    
     
     var game = new Phaser.Game(config);
+    
+    
+// Valeur D'equilibrages -----------------------------------------------
+    
+    var HauterDeSaut = 380;
+    var Deplacement = 180;
 
+    
+
+    
+    
+//__ Fonction Preload _______________________________________________________________________________________________________________________________________________ 
+//___________________________________________________________________________________________________________________________________________________________________
+    
+    
+    
     function preload ()
     {
         this.load.image('sky', 'assets/sky.png');
@@ -60,6 +71,11 @@
         this.load.spritesheet('dude', 'assets/escargot.png', { frameWidth: 54, frameHeight: 27 });
     }
 
+    
+    
+//__ Fonction Create ________________________________________________________________________________________________________________________________________________ 
+//___________________________________________________________________________________________________________________________________________________________________
+   
     function create ()
     {
         this.add.image(400, 300, 'sky');
@@ -72,70 +88,105 @@
         
         
         
-        // joueur 1
+        // joueur
         player = this.physics.add.sprite(100, 450, 'dude');
         player.setBounce(0.2);
         player.setCollideWorldBounds(true);
 
+    
+        
+        
+        // Cursors
         cursors = this.input.keyboard.createCursorKeys();
 
         
         // Score
         jumpText = this.add.text(30, 15, ('jump = '+ verifSaut), { fontSize: '20px', fill: '#000' });
         doublejumpText = this.add.text(30, 32, ('doublejump = '+ doubleSaut), { fontSize: '20px', fill: '#000' });
+        
+        
+        
         // Collider et Overlap
-        this.physics.add.collider(player, platforms, jumpRefresh);
+        this.physics.add.collider(player, platforms, toucheSol);
        
         this.physics.add.overlap(player, centre,);
     }
 
+    
+    
+//__ Fonction Update ________________________________________________________________________________________________________________________________________________ 
+//___________________________________________________________________________________________________________________________________________________________________
+    
     function update ()
     {  
-    // Gravité 
+// Gravité
+        //_____________________________________________________________________________
+        
+    // Sol -----------------------------
         if (player.y >= 300){
             player.setGravityY(300);
             jump = - HauterDeSaut
         }
+        
+    // plafond -------------------------
         if (player.y < 300){
             player.setGravityY(-900);
             jump = HauterDeSaut
         }
-              
-    // Deplacement
+     
         
-        // Gauche
+        
+// Deplacement
+        //_____________________________________________________________________________
+        
+    // Gauche -------------------------
         if (cursors.left.isDown)  {
-            player.setVelocityX(-260);
+            player.setVelocityX(-Deplacement);
         }
         
-        //Droite
+    //Droite --------------------------
         else if (cursors.right.isDown){
-            player.setVelocityX(260);
+            player.setVelocityX(Deplacement);
         }
         
-        //Kill du momentum
+    //Kill du momentum ----------------
         else{
             player.setVelocityX(0);
         }
     
-        //Saut   
-        if (cursors.up.isDown && verifSaut == true){
+        
+    //Saut  -----------------------------------------------
+        
+        //Etape-1 : apuis touche --> saut + plus toucher sol
+        if (cursors.up.isDown && verifSaut == true && doubleSaut == false){
             verifSaut = false
             player.setVelocityY(jump);
             jumpText.setText('jump = '+ verifSaut);
             }  
         
-        if (cursors.up.onUp && verifSaut == false){
+        //Etape-2 : lacher touche --> doublesaut activer
+        if (cursors.up.isUp && verifSaut == false && doubleSaut == false){
             doubleSaut = true
+            doublejumpText.setText('doublejump = '+ doubleSaut);
         }
-        
-        if (cursors.up.isDown && verifSaut == false && doubleSaut == true)
+       
+        //Etape-3 : apuis touche 2 --> saut + doublesaut desactiver
+        if (cursors.up.isDown && doubleSaut == true && verifSaut == false )
             player.setVelocityY(jump);
-            doubleSaut = false
-        }      
-    function jumpRefresh (player, platforms)
+            
+        }  
+    
+
+       
+    
+//__ Fonction Anex __________________________________________________________________________________________________________________________________________________ 
+//___________________________________________________________________________________________________________________________________________________________________
+
+    
+    function toucheSol (player, platforms)
     {
         verifSaut = true;
+        doubleSaut = false;
         jumpText.setText('jump = '+ verifSaut);
         doublejumpText.setText('doublejump = '+ doubleSaut);
 
