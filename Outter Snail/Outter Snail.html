@@ -36,7 +36,6 @@
     
     
     var player;
-    var balls;
     var platforms;
     var cursors;
     var gravite = true;      // Grave true = normale / false = a l'envert
@@ -62,8 +61,8 @@
 
     
     
-//__ Fonction Preload _______________________________________________________________________________________________________________________________________________ 
-//___________________________________________________________________________________________________________________________________________________________________
+//__ Fonction Preload ____________________________________________________________________________________
+//________________________________________________________________________________________________________
     
     
     
@@ -78,8 +77,8 @@
 
     
     
-//__ Fonction Create ________________________________________________________________________________________________________________________________________________ 
-//___________________________________________________________________________________________________________________________________________________________________
+//__ Fonction Create _____________________________________________________________________________________
+//________________________________________________________________________________________________________
    
     function create ()
     {
@@ -104,18 +103,11 @@
         
         
     // joueur
-        player = this.physics.add.sprite(960, 740, 'snail');
+        player = this.physics.add.sprite(1760, 740, 'snail');
         player.setBounce(0.2);
-        player.setCollideWorldBounds(true);
+        player.setCollideWorldBounds(false);
         
-        
-        
-        
-        
-        
-        
-        
-        
+
         
     // Cameras
         this.cameras.main.setSize(1920, 1080);
@@ -125,7 +117,7 @@
         cursors = this.input.keyboard.createCursorKeys();
 
         
-    // Score
+    // Affichagess
         puissanceText = this.add.text(1920, 16, (puissanceDeSaut), { fontSize: '32px', fill: '#000' });
         toucheSolText = this.add.text(1950, 16,('test' +toucheLeSol), { fontSize: '32px', fill: '#000' });
         
@@ -220,8 +212,8 @@
 
     
     
-//__ Fonction Update ____________________________________________________________________________________________________
-//_______________________________________________________________________________________________________________________
+//__ Fonction Update _____________________________________________________________________________________
+//________________________________________________________________________________________________________
     function update ()
     {  
 // Cam 
@@ -242,30 +234,32 @@
     // Sol -----------------------------
         if (player.y > 540){
             player.setGravityY(300);
-            jump = - hauterDeSaut
             gravite = true
-            player.anims.play('flip');
             
+            jump = - hauterDeSaut
             if (player.y <= 570){
                 toucheLeSol = false
             toucheSolText.setText('test' +toucheLeSol);
             }
+            
+            player.anims.play('flip');
             
         }
         
     // plafond -------------------------
         if (player.y < 540){
             player.setGravityY(-900);
-            jump = hauterDeSaut
             gravite = false
-            player.anims.play('reflip');
             
+            jump = hauterDeSaut
             if (player.y >= 510){
                 toucheLeSol = false
             toucheSolText.setText('test' +toucheLeSol);
             }
+            
+            player.anims.play('reflip');
+               
         }
-     
         
         
 // Deplacement
@@ -334,24 +328,14 @@
             puissanceText.setText(puissanceDeSaut);
         }
 
-        if (cursors.up.isUp){
+        if (cursors.up.isUp || puissanceDeSaut == tempsDeSaut){
             toucheLeSol = false
             toucheSolText.setText('test' +toucheLeSol);
-        }
-        
-        
-        if (puissanceDeSaut == tempsDeSaut){
-            toucheLeSol = false
-            toucheSolText.setText('test' +toucheLeSol);
-        }
-        
-        
-        
-        
+        }   
     }
     
-//__ Fonction Anex __________________________________________________________________________________________________________________________________________________ 
-//___________________________________________________________________________________________________________________________________________________________________
+//__ Fonction Anex _______________________________________________________________________________________ 
+//________________________________________________________________________________________________________
 
     
     function toucheSol (player, platforms)
