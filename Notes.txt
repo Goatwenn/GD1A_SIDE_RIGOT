@@ -1,6 +1,9 @@
-https://photonstorm.github.io/phaser3-docs/Phaser.Input.Keyboard.KeyCodes.html
+Nomenclature : 
 
-
+“GD1[A/B]_SIDE_[NOM]”.
+donc:
+GD1A_SIDE_RIGOT
+------------------------------------------------------------
 
 Description des fichier : 
 
@@ -12,3 +15,7 @@ OutterSnail V: 0.2
 description: 
 
 toutes lesd modification
+
+------------------------------------------------------------
+Liens Utils : 
+https://photonstorm.github.io/phaser3-docs/Phaser.Input.Keyboard.KeyCodes.html
