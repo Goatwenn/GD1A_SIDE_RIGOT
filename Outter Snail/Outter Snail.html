@@ -16,8 +16,8 @@
 
     var config = {
         type: Phaser.AUTO,
-        width: 4000,
-        height: 1080,
+        width: 8000,
+        height: 2160,
         physics: {
             default: 'arcade',
             arcade: {
@@ -38,6 +38,7 @@
     var player;
     var platforms;
     var cursors;
+    var fruit;
     var gravite = true;      // Grave true = normale / false = a l'envert
     var animation = false;    // true = gauche / false = droit
     
@@ -63,12 +64,20 @@
 //__ Fonction Preload ____________________________________________________________________________________
 //________________________________________________________________________________________________________
     
-    
-    
     function preload ()
     {   
+        this.load.image('platforme_M1_1', 'assets/monde_1/platforme_M1_1.png');
+        this.load.image('platforme_M1_2', 'assets/monde_1/platforme_M1_2.png');
+        this.load.image('platforme_M1_3', 'assets/monde_1/platforme_M1_3.png');
+        this.load.image('platforme_M1_4', 'assets/monde_1/platforme_M1_4.png');
+        this.load.image('platforme_M1_5', 'assets/monde_1/platforme_M1_5.png');
+        this.load.image('platforme_M1_6', 'assets/monde_1/platforme_M1_6.png');
+        this.load.image('platforme_M1_7', 'assets/monde_1/platforme_M1_7.png');
+       
+        
+        
         this.load.image('sky', 'assets/sky.png');
-        this.load.image('sol', 'assets/sol.png');
+        this.load.image('fruit', 'assets/fruit.png');
         this.load.image('killZone', 'assets/centre.png');
         this.load.image('platforme', 'assets/platforme_1.png');
         this.load.spritesheet('snail', 'assets/snail.png', { frameWidth: 108, frameHeight: 54 });
@@ -82,27 +91,30 @@
     function create ()
     {
     // - Sky :
-        this.add.image(960, 540, 'sky');
+        this.add.image(4000, 1080, 'sky');
 
         
      // - Phisique :   
         platforms = this.physics.add.staticGroup();
         centre = this.physics.add.staticGroup();
 
-    // - Sol : 
-        platforms.create(960, 0, 'sol').refreshBody();
-        platforms.create(960, 1080, 'sol').refreshBody();;
-        
-     // - Platforms :    
-        platforms.create(2250, 250, 'platforme')
-        platforms.create(2700, 250, 'platforme')
-        platforms.create(2000, 700, 'platforme')
+    // - Platforms : 
+        platforms.create(294,1906, 'platforme_M1_1');
+        platforms.create(986,1905, 'platforme_M1_2');
+        platforms.create(1571,1764, 'platforme_M1_3');
+        platforms.create(2142,792, 'platforme_M1_4');
+        platforms.create(2941,1468, 'platforme_M1_5');
        
         
         
+    // Fruit :  
+        fruit = this.physics.add.group(); 
+        var fruit = fruit.create(300,600,'fruit');
+        //fruit.fixedToCamera = true;
+        
         
     // joueur
-        player = this.physics.add.sprite(1760, 740, 'snail');
+        player = this.physics.add.sprite(294,1400, 'snail');
         player.setBounce(0.2);
         player.setCollideWorldBounds(false);
         
@@ -191,10 +203,12 @@
     {  
 // Cam 
     //_____________________________________________________________________________
-        positionCam = (player.y - 540)/1.5;
-        this.cameras.main.startFollow(player,false,0.5,0.5,0,positionCam);
+        positionCam = (player.y - 1080)/1.5;
+        this.cameras.main.startFollow(player,false,0.50,0.50,0,positionCam);
         
 
+        
+        
         
 // Debug Info :
     //_____________________________________________________________________________
@@ -211,41 +225,41 @@
 // Gravité
         //__________________________________________________________________________  
     // Sol -----------------------------
-        if (player.y > 540){
+        if (player.y > 1080){
             player.setGravityY(300);
             gravite = true
             
             jump = - hauterDeSaut
-            if (player.y <= 570){
+            if (player.y <= 1100){
                 toucheLeSol = false
             }
         }
         
     // plafond -------------------------
-        if (player.y < 540){
+        if (player.y < 1080){
             player.setGravityY(-900);
             gravite = false
             
             jump = hauterDeSaut
-            if (player.y >= 510){
+            if (player.y >= 1060){
                 toucheLeSol = false
             }    
         }
         
-        if(player.y >= 530 && gravite == false && animation == false){
+        if(player.y >= 1070 && gravite == false && animation == false){
             player.anims.play('reflipDroit');
         }
         
-        if(player.y >= 530 && gravite == false && animation == true){
+        if(player.y >= 1070 && gravite == false && animation == true){
             player.anims.play('reflipGauche');
         }
         
         
-        if(player.y <= 550 && gravite == true && animation == false){
+        if(player.y <= 1090 && gravite == true && animation == false){
             player.anims.play('flipDroit');
         }
         
-        if(player.y <= 550 && gravite == true && animation == true){
+        if(player.y <= 1090 && gravite == true && animation == true){
             player.anims.play('flipGauche');
         }
         
@@ -317,15 +331,7 @@
             
         }
         
-        
-        
-        
-        
-        
-        
-        
-        
-        
+
     }
 
 //__ Fonction Anex _______________________________________________________________________________________ 
