@@ -66,6 +66,8 @@
     
     function preload ()
     {   
+        
+    // Niveau 1 
         this.load.image('platforme_M1_1', 'assets/monde_1/platforme_M1_1.png');
         this.load.image('platforme_M1_2', 'assets/monde_1/platforme_M1_2.png');
         this.load.image('platforme_M1_3', 'assets/monde_1/platforme_M1_3.png');
@@ -73,14 +75,20 @@
         this.load.image('platforme_M1_5', 'assets/monde_1/platforme_M1_5.png');
         this.load.image('platforme_M1_6', 'assets/monde_1/platforme_M1_6.png');
         this.load.image('platforme_M1_7', 'assets/monde_1/platforme_M1_7.png');
+        this.load.image('platforme_M1_8', 'assets/monde_1/platforme_M1_8.png');
+       
        
         
-        
+    // Objetc
         this.load.image('sky', 'assets/sky.png');
         this.load.image('fruit', 'assets/fruit.png');
         this.load.image('killZone', 'assets/centre.png');
-        this.load.image('platforme', 'assets/platforme_1.png');
-        this.load.spritesheet('snail', 'assets/snail.png', { frameWidth: 108, frameHeight: 54 });
+        this.load.image('spaceShip', 'assets/spaceShip.png',{ frameWidth: 672, frameHeight: 126 });
+        this.load.image('particules', 'assets/particules.png');
+        
+        
+    // Personage
+        this.load.spritesheet('snail', 'assets/snail.png',{ frameWidth: 108, frameHeight: 54 });
     }
 
     
@@ -96,15 +104,23 @@
         
      // - Phisique :   
         platforms = this.physics.add.staticGroup();
-        centre = this.physics.add.staticGroup();
+        spaceShip = this.physics.add.staticGroup();
 
     // - Platforms : 
-        platforms.create(294,1906, 'platforme_M1_1');
-        platforms.create(986,1905, 'platforme_M1_2');
+        platforms.create(294,1907, 'platforme_M1_1');
+        platforms.create(986,1908, 'platforme_M1_2');
         platforms.create(1571,1764, 'platforme_M1_3');
         platforms.create(2142,792, 'platforme_M1_4');
         platforms.create(2941,1468, 'platforme_M1_5');
-       
+        platforms.create(3714,1944, 'platforme_M1_6');
+        platforms.create(4324,1665, 'platforme_M1_7');
+        platforms.create(6848,1941, 'platforme_M1_8');
+    
+        
+        
+    //Space Ship (sortie de niveaux)  
+        
+        spaceShip.create(7464,1660, 'spaceShip');
         
         
     // Fruit :  
@@ -116,13 +132,13 @@
     // joueur
         player = this.physics.add.sprite(294,1400, 'snail');
         player.setBounce(0.2);
-        player.setCollideWorldBounds(false);
+        player.setCollideWorldBounds(true);
         
 
         
     // Cameras
         this.cameras.main.setSize(1920, 1080);
-        
+        //this.cameras.setCollideWorldBounds(true);
         
     // Cursors
         cursors = this.input.keyboard.createCursorKeys();
@@ -143,6 +159,7 @@
         
     // Collider et Overlap
         this.physics.add.collider(player, platforms, toucheSol);
+        this.physics.add.collider(player, spaceShip, sortieDeNiveau);
         
         
 // Animation -------------------------------------------------
@@ -194,7 +211,22 @@
             key: 'turnRightFlip',
             frames: this.anims.generateFrameNumbers('snail', { start: 14, end: 17 }),
             duration: 300,
-        });             
+        });   
+        
+        
+        
+    // spaceShip ------------------------------
+        this.anims.create({
+            key: 'sortie',
+            frames: this.anims.generateFrameNumbers('spaceShip', { start: 1, end: 2 }),
+            duration: 300,
+        });
+        
+        
+        
+        
+        
+        
     }
   
 //__ Fonction Update _____________________________________________________________________________________
@@ -204,9 +236,8 @@
 // Cam 
     //_____________________________________________________________________________
         positionCam = (player.y - 1080)/2;
-        this.cameras.main.startFollow(player,false,0.50,0.50,0,positionCam);
+        this.cameras.main.startFollow(player,false,0.05,0.05,0,positionCam);
         
-
         
         
         
@@ -344,6 +375,13 @@
         toucheLeSol = true
         doubleJump = false
         finDoubleJump = false
+    }
+    
+    
+    function sortieDeNiveau (player, spaceShip)
+    {
+        player.disableBody(true, true);
+        player.anims.play('sortie');
     }
        
 </script>
