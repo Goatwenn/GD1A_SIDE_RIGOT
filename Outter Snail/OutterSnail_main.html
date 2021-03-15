@@ -24,13 +24,18 @@
                 gravity: { y: 300 },
                 debug: false
             }
+            
         },
         scene: {
             preload: preload,
             create: create,
             update: update
         }
+        
     };
+    
+    
+   var game = new Phaser.Game(config); 
     
 // Variable ____________________________________________
     
@@ -39,6 +44,8 @@
     var platforms;
     var cursors;
     var fruit;
+    var spaceShip;
+    
     var gravite = true;      // Grave true = normale / false = a l'envert
     var animation = false;    // true = gauche / false = droit
     
@@ -51,7 +58,14 @@
     
     var cooldawn = 120;
     
-    var game = new Phaser.Game(config);
+    var vieDuJoueur = 1;
+    var barreDeVie;
+    
+// Variable Timer -----------------------------------------------
+    
+    var timeAnimeShip;
+    
+    
     
     
 // Valeur D'equilibrages -----------------------------------------------
@@ -83,12 +97,13 @@
         this.load.image('sky', 'assets/sky.png');
         this.load.image('fruit', 'assets/fruit.png');
         this.load.image('killZone', 'assets/centre.png');
-        this.load.image('spaceShip', 'assets/spaceShip.png',{ frameWidth: 672, frameHeight: 126 });
         this.load.image('particules', 'assets/particules.png');
         
+        this.load.spritesheet('spaceShip', 'assets/spaceShip.png',{frameWidth:726, frameHeight:126})
+        this.load.spritesheet('vie', 'assets/barreDeVie.png',{frameWidth:218, frameHeight:54});
         
     // Personage
-        this.load.spritesheet('snail', 'assets/snail.png',{ frameWidth: 108, frameHeight: 54 });
+        this.load.spritesheet('snail', 'assets/snail.png',{frameWidth:108, frameHeight:54});
     }
 
     
@@ -101,10 +116,13 @@
     // - Sky :
         this.add.image(4000, 1080, 'sky');
 
+
+    
+        
+        
         
      // - Phisique :   
         platforms = this.physics.add.staticGroup();
-        spaceShip = this.physics.add.staticGroup();
 
     // - Platforms : 
         platforms.create(294,1907, 'platforme_M1_1');
@@ -117,10 +135,11 @@
         platforms.create(6848,1941, 'platforme_M1_8');
     
         
+        barreDeVie = this.physics.add.sprite(6564,1660, 'vie');
         
     //Space Ship (sortie de niveaux)  
         
-        spaceShip.create(7464,1660, 'spaceShip');
+        spaceShip = this.physics.add.sprite(7464,1460, 'spaceShip');
         
         
     // Fruit :  
@@ -130,7 +149,7 @@
         
         
     // joueur
-        player = this.physics.add.sprite(294,1400, 'snail');
+        player = this.physics.add.sprite(6564,1660, 'snail');
         player.setBounce(0.2);
         player.setCollideWorldBounds(true);
         
@@ -138,6 +157,7 @@
         
     // Cameras
         this.cameras.main.setSize(1920, 1080);
+        this.cameras.main.setBounds(0,0,8000,2160)
         //this.cameras.setCollideWorldBounds(true);
         
     // Cursors
@@ -157,9 +177,13 @@
         
         cooldawnDebugText = this.add.text(1920, 216,(''), { fontSize: '32px', fill: '#000' });
         
+    
+        
     // Collider et Overlap
         this.physics.add.collider(player, platforms, toucheSol);
-        this.physics.add.collider(player, spaceShip, sortieDeNiveau);
+        
+        this.physics.add.collider(spaceShip, platforms);
+        this.physics.add.overlap(player, spaceShip, sortieDeNiveau);
         
         
 // Animation -------------------------------------------------
@@ -216,16 +240,49 @@
         
         
     // spaceShip ------------------------------
+        
         this.anims.create({
             key: 'sortie',
-            frames: this.anims.generateFrameNumbers('spaceShip', { start: 1, end: 2 }),
-            duration: 300,
+            frames: this.anims.generateFrameNumbers('spaceShip', { start: 1, end: 12 }),
+            frameRate: 6,
+        });
+    
+        
+        this.anims.create({
+            key: 'reacteur',
+            frames: this.anims.generateFrameNumbers('spaceShip', { start: 10, end: 12 }),
+            frameRate: 6,
+            repeat: 10000,
         });
         
         
+    // Barre de Vie ------------------------------
+
+        this.anims.create({
+            key: '3_coeur',
+            frames: [ { key: 'vie', frame: 0. } ],
+        });
         
+        this.anims.create({
+            key: '2_coeur',
+            frames: [ { key: 'vie', frame: 1. } ],
+        });
         
+        this.anims.create({
+            key: '1_coeur',
+            frames: this.anims.generateFrameNumbers('vie', { start: 2, end: 3 }),
+            frameRate: 6,
+            repeat: 10000,
+        });
         
+        this.anims.create({
+            key: '0_coeur',
+            frames: [ { key: 'vie', frame: 4. } ],
+        });
+        
+// Timer ------------------------------ 
+        
+       // timer = game.time.create(false);
         
     }
   
@@ -233,13 +290,36 @@
 //________________________________________________________________________________________________________
     function update ()
     {  
+        
+        
+        
+// Barre de Vie 
+    //_____________________________________________________________________________      
+        
+        barreDeVie.setGravityY(-300);
+
+        barreDeVie.x = player.x - 700
+        barreDeVie.y = (player.y+1950)/2
+        
+        if(vieDuJoueur == 3){
+            barreDeVie.anims.play('3_coeur');
+        }
+        
+        else if (vieDuJoueur == 2){
+            barreDeVie.anims.play('2_coeur');
+        }
+        
+        else if (vieDuJoueur == 1){
+            barreDeVie.anims.play('1_coeur');
+        }
+        
+        else if (vieDuJoueur == 0){
+            barreDeVie.anims.play('0_coeur');
+        }
 // Cam 
     //_____________________________________________________________________________
         positionCam = (player.y - 1080)/2;
-        this.cameras.main.startFollow(player,false,0.05,0.05,0,positionCam);
-        
-        
-        
+        this.cameras.main.startFollow(player,false,0.05,0.05,0,positionCam);   
         
 // Debug Info :
     //_____________________________________________________________________________
@@ -251,7 +331,6 @@
         positionCamText.setText('CamLocation = '+positionCam);
         cooldawnDebugText.setText('cooldawn = '+cooldawn);
         doubleJumpText.setText('Double Saut = ' +doubleJump);
-        
 // Gravité
         //__________________________________________________________________________  
     // Sol -----------------------------
@@ -380,10 +459,15 @@
     
     function sortieDeNiveau (player, spaceShip)
     {
+        
         player.disableBody(true, true);
-        player.anims.play('sortie');
+        spaceShip.anims.play('sortie');
+        //spaceShip.anims.play('reacteur');
+        spaceShip.setGravityY(-300);
+        spaceShip.setVelocityY(-200);
+
     }
-       
+      
 </script>
 
 </body>
