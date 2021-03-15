@@ -47,7 +47,7 @@
     var spaceShip;
     
     var gravite = true;      // Grave true = normale / false = a l'envert
-    var animation = false;    // true = gauche / false = droit
+    var droite = false;    // true = gauche / false = droit
     
     var camOffsetY;
     
@@ -56,12 +56,13 @@
     var doubleJump = false;
     var finDoubleJump = false;
     
-    var cooldawn = 120;
-    
     var vieDuJoueur = 199.75;
     var barreDeVie;
     var joueurMort = false;
     
+// Pouvoir ------------------  
+    var dash = true;
+    var jetPack = false;
     
 // Variable Timer -----------------------------------------------
     
@@ -96,7 +97,7 @@
        
         
     // Objetc
-        this.load.image('sky', 'assets/sky.png');
+        this.load.image('sky', 'assets/sky_niveaux1.png');
         this.load.image('fruit', 'assets/fruit.png');
         this.load.image('killZone', 'assets/centre.png');
         this.load.image('particules', 'assets/particules.png');
@@ -124,7 +125,7 @@
 
     // - Platforms : 
         platforms.create(294,1907, 'platforme_M1_1');
-        platforms.create(986,1908, 'platforme_M1_2');
+        platforms.create(987,1907, 'platforme_M1_2');
         platforms.create(1571,1764, 'platforme_M1_3');
         platforms.create(2142,792, 'platforme_M1_4');
         platforms.create(2941,1468, 'platforme_M1_5');
@@ -133,7 +134,7 @@
         platforms.create(6848,1941, 'platforme_M1_8');
     
         
-        barreDeVie = this.physics.add.sprite(200,800, 'vie').setScrollFactor(0,0);
+        barreDeVie = this.physics.add.sprite(200,1000, 'vie').setScrollFactor(0,0);
     
         
         
@@ -146,11 +147,10 @@
     // Fruit :  
         //fruit = this.physics.add.group(); 
         //var fruit = fruit.create(300,600,'fruit');
-        //fruit.fixedToCamera = true;
         
         
     // joueur
-        player = this.physics.add.sprite(6564,1460, 'snail');
+        player = this.physics.add.sprite(256,1260, 'snail');
         player.setBounce(0.2);
         player.setCollideWorldBounds(true);
         
@@ -175,7 +175,7 @@
         camOffsetYText = this.add.text(20,170,(''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0);
         
         gravText = this.add.text(20,230,(''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0);
-        animationText = this.add.text(20,260,(''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0);
+        droiteText = this.add.text(20,260,(''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0);
         
         vieDuJoueurText = this.add.text(20,320,(''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0);
         joueurMortTexT = this.add.text(20,350,(''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0);
@@ -287,6 +287,21 @@
             frames: [ { key: 'vie', frame: 4. } ],
         });
         
+        
+    // Pouvoir ------------------------------  
+        
+        this.anims.create({
+            key: 'dashGauche',
+            frames: [ { key: 'snail', frame: 2. } ],
+        });
+        
+        this.anims.create({
+            key: 'retourdashGauche',
+            frames: [ { key: 'snail', frame: 0. } ],
+        });
+        
+        
+        
 // Timer ------------------------------ 
         
        // timer = game.time.create(false);
@@ -330,14 +345,13 @@
     //_____________________________________________________________________________
         camOffsetY = (player.y - 1080)/2;
         this.cameras.main.startFollow(player,false,0.05,0.05,0,camOffsetY);   
-        
 // Debug Info :
     //_____________________________________________________________________________
         playeryText.setText('y ='+ player.y);
         playerxText.setText('x ='+ player.x);
         sautText.setText('Au Sol = ' +toucheLeSol);
         gravText.setText('grav = '+ gravite);
-        animationText.setText(('Droite = '+ animation));
+        droiteText.setText(('Gauche = '+ droite));
         camOffsetYText.setText('camOffsetY = '+camOffsetY);
         doubleJumpText.setText('Double Saut = ' +doubleJump);
         vieDuJoueurText.setText('Vie = ' +vieDuJoueur);
@@ -366,20 +380,20 @@
             }    
         }
         
-        if(player.y >= 1070 && gravite == false && animation == false){
+        if(player.y >= 1070 && gravite == false && droite == false){
             player.anims.play('reflipDroit');
         }
         
-        if(player.y >= 1070 && gravite == false && animation == true){
+        if(player.y >= 1070 && gravite == false && droite == true){
             player.anims.play('reflipGauche');
         }
         
         
-        if(player.y <= 1090 && gravite == true && animation == false){
+        if(player.y <= 1090 && gravite == true && droite == false){
             player.anims.play('flipDroit');
         }
         
-        if(player.y <= 1090 && gravite == true && animation == true){
+        if(player.y <= 1090 && gravite == true && droite == true){
             player.anims.play('flipGauche');
         }
         
@@ -391,13 +405,13 @@
         if (cursors.left.isDown)  {
             player.setVelocityX(-deplacement);
             
-            if(gravite == true && animation == false){
+            if(gravite == true && droite == false){
                 player.anims.play('turnLeft');
             }
-            if(gravite == false && animation == false){
+            if(gravite == false && droite == false){
                 player.anims.play('turnLeftFlip');
             }
-            animation = true
+            droite = true
 
         }
         
@@ -405,13 +419,13 @@
         else if (cursors.right.isDown){
             player.setVelocityX(deplacement);
             
-            if(gravite == true && animation == true){
+            if(gravite == true && droite == true){
                 player.anims.play('turnRight');
             }
-            if(gravite == false && animation == true){
+            if(gravite == false && droite == true){
                 player.anims.play('turnRightFlip');
             }
-            animation = false
+            droite = false
         }
         
     //Kill du momentum ----------------
@@ -439,19 +453,24 @@
         
     // Pouvoir -------------------------
     
-        cooldawn = cooldawn - 1
-
-        
-        if (cursors.space.isDown ){
-            if(animation = false){
-                player.setVelocityX(1000);
-            }
-            else{
+        if(dash == true){
+           // dash = false
+            if (cursors.space.isDown && cursors.left.isDown){
+                player.anims.play('dashGauche');
                 player.setVelocityX(-1000);
-            }
+                if(cursors.space.isUp){
+                    player.anims.play('retourdashGauche');
+                }
                 
-            
+                
+            }  
+            if (cursors.space.isDown && cursors.right.isDown){
+                
+                player.setVelocityX(1000);  
+            }  
         }
+        
+    
         
 
     }
