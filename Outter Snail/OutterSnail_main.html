@@ -73,6 +73,14 @@
     var invincible = false;
     var timerInvincible = 0;
     
+  // Panneaux ------------------
+    var panneaux_dash;
+    var panneaux_jetPack;
+    
+    var panneaux_text;
+    var panneaux_text_on = false;
+    var panneaux_text_on_validation = false;
+    
     
   // Pouvoir ------------------  
     var dash = true;
@@ -121,6 +129,11 @@
         this.load.spritesheet('spaceShip', 'assets/spaceShip.png',{frameWidth:726, frameHeight:126});
         this.load.spritesheet('vie', 'assets/barreDeVie.png',{frameWidth:218, frameHeight:54});
         
+    // Panneaux
+        this.load.image('panneaux_dash', 'assets/panneaux_dash.png');
+        this.load.image('panneaux_jetpack', 'assets/panneaux_jetPack.png');
+        this.load.spritesheet('panneaux_text', 'assets/panneaux_text.png',{frameWidth:402, frameHeight:260});
+        
     // Personage
         this.load.spritesheet('snail', 'assets/snail.png',{frameWidth:108, frameHeight:54});
         this.load.spritesheet('ennemi', 'assets/snail.png',{frameWidth:108, frameHeight:54});
@@ -153,7 +166,10 @@
         
     // - Phisique :   
         platforms = this.physics.add.staticGroup();
-
+        panneaux_text = this.physics.add.staticGroup();
+        panneaux_dash = this.physics.add.staticGroup();
+        panneaux_jetpack = this.physics.add.staticGroup();
+        
     // - Platforms : 
         platforms.create(294,1907, 'platforme_M1_1');
         platforms.create(987,1907, 'platforme_M1_2');
@@ -167,9 +183,14 @@
     // - limite de maps :   
         platforms.create(4000,-30, 'limiteDeMap');
         platforms.create(4000,2190, 'limiteDeMap');
-        
+      
+    // - Barre de vie :    
         barreDeVie = this.physics.add.sprite(200,1000, 'vie').setScrollFactor(0,0);
     
+    // - Panneaux :    
+        panneaux_text.create(3320,1600, 'panneaux_text');
+        panneaux_dash.create(3620,1694, 'panneaux_dash');
+        panneaux_jetpack.create(3920,1694, 'panneaux_jetpack');
         
     //Space Ship (sortie de niveaux)  
         
@@ -183,7 +204,7 @@
         
         
     // joueur
-        player = this.physics.add.sprite(6564,1660, 'snail'); //256,1260
+        player = this.physics.add.sprite(3863,1700, 'snail'); //256,1260 spawn   6564,1660 ship
         player.setBounce(0.2);
         player.setCollideWorldBounds(false);
         
@@ -217,6 +238,9 @@
         dashTexT = this.add.text(1500,20,(''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0);
         timerDashOnText = this.add.text(1500,50,(''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0);
         
+        panneaux_text_ontext = this.add.text(1500,110,(''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0);
+        
+        
     // Collider et Overlap
         this.physics.add.collider(player, platforms, toucheSol);
         
@@ -228,7 +252,8 @@
         this.physics.add.collider(ennemi, platforms);
         this.physics.add.collider(ennemi, player, contacte);
         
-        
+        this.physics.add.overlap(panneaux_text, player, ecrire);
+        this.physics.add.overlap(panneaux_dash, player, powerupdash);
         
         
 // Animation -------------------------------------------------
@@ -337,9 +362,20 @@
             frames: [ { key: 'snail', frame: 5. } ],
         });
           
-// Timer ------------------------------ 
+    // Panneux ------------------------------ 
         
-       // timer = game.time.create(false);
+        this.anims.create({
+            key: 'panneaux_text_1_ecrire',
+            frames: this.anims.generateFrameNumbers('panneaux_text', { start: 0, end: 5 }),
+            frameRate: 20,
+        });
+        
+        this.anims.create({
+            key: 'panneaux_text_1_effacer',
+            frames: this.anims.generateFrameNumbers('panneaux_text', { start: 5, end: 10 }),
+            frameRate: 20,
+        });
+        
         
     }
   
@@ -731,7 +767,7 @@
         
         
         
-// Particules 
+// Timer 
     //_____________________________________________________________________________      
         
         timerParticules = timerParticules + 1
@@ -749,7 +785,10 @@
             }
         }  
          
+// Panneaux
+    //_____________________________________________________________________________       
         
+
 // Cam 
     //_____________________________________________________________________________
         camOffsetY = (player.y - 1080)/2;
@@ -770,6 +809,7 @@
         invincibleTexT.setText('invincible = ' +invincible);
         dashTexT.setText('dash = ' +dash);
         timerDashOnText.setText('timerDashOn = ' +timerDashOn);
+        panneaux_text_ontext.setText('ptOn = ' +panneaux_text_on);
         
 // Gravité
         //__________________________________________________________________________  
@@ -971,6 +1011,7 @@
             // Retour de dash
                 if(timerDash >= 50){
                     timerDashOn = false
+                    timerDash = 0
                     player.anims.play('flipGauche'); 
                     
                 }  
@@ -1010,6 +1051,7 @@
             // Retour de dash
                 if(timerDash >= 50){
                     timerDashOn = false
+                    timerDash = 0
                     player.anims.play('flipDroit');
                 }  
             }
@@ -1035,7 +1077,6 @@
         }
     }
     
-    
     function sortieDeNiveau (player, spaceShip)
     {
         
@@ -1050,14 +1091,36 @@
         
     }
       
-    
+    function ecrire (player, panneaux_text)
+    {
+        if(cursors.space.isDown && panneaux_text_on == false){
+            panneaux_text_on_validation = true
+            panneaux_text.anims.play('panneaux_text_1_ecrire');
+        }
+        
+        if(cursors.space.isUp && panneaux_text_on_validation == true && panneaux_text_on == false){ 
+            panneaux_text_on = true
+        }
+        
+        if(cursors.space.isDown && panneaux_text_on == true){
+            panneaux_text.anims.play('panneaux_text_1_effacer');
+            panneaux_text_on_validation = false
+        }
+        
+        if(cursors.space.isUp && panneaux_text_on_validation == false && panneaux_text_on == true ){
+            panneaux_text_on = false 
+        }
+        
+    }
     
     function deletParticules (particule, platforms)
     {
-        particule.disableBody(true, true); 
+        particule.disableBody(true, true);
     }
     
-    
+    function powerupdash (player, panneaux_dash){
+        dash = true
+    }
     
     function contacte (ennemi, player)
     {
