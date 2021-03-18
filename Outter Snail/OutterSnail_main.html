@@ -36,8 +36,8 @@
     
    var game = new Phaser.Game(config); 
     
-// Variable ____________________________________________
-     
+// Variable ___________________________________________
+    
     var player;
     var platforms;
     var cursors;
@@ -56,6 +56,14 @@
   // Info ------------------   
     var gravite = true;      // Grave true = normale / false = a l'envert
     var droite = false;    // true = gauche / false = droit
+    var test = false;
+  // UI -------------------- 
+    
+    // var echap;
+    
+   
+    
+    
     
   // camera ------------------    
     var camOffsetY;
@@ -63,6 +71,7 @@
   // Saut ------------------  
     var jump;
     var toucheLeSol = false;
+    var toucheMur = false;
     var doubleJump = false;
     var finDoubleJump = false;
     
@@ -85,17 +94,28 @@
     
     
   // Pouvoir ------------------  
-    var dash = true;
+    
+    var inventaire;
+    var inventaireStockage = 0;
+    
+    var dash = false;
     var timerDashOn = false;
     var timerDash = 0;
     var directionDash;
     
-    var jetPack = false;
+    var jetpack = false;
+    var timerJetpack = 0;
+    var timerJetpackOn = false;
+    
     
   // Particule ------------------ 
     var particule;
     var timerParticules = 0;
     var randomParticules = 0;
+   
+
+    
+    
     
 // Valeur D'equilibrages -----------------------------------------------
     
@@ -146,6 +166,14 @@
     // Personage
         this.load.spritesheet('snail', 'assets/snail.png',{frameWidth:108, frameHeight:54});
         this.load.spritesheet('ennemi', 'assets/snail.png',{frameWidth:108, frameHeight:54});
+    
+    // UI -------------------------    
+        this.load.image('menuPause', 'assets/menus/menusPause.png');
+        this.load.spritesheet('echap', 'assets/touches/echap.png',{frameWidth:76, frameHeight:76});
+        this.load.spritesheet('inventaire', 'assets/inventaire.png',{frameWidth:100, frameHeight:100});
+    
+        
+        
         
         
         
@@ -160,6 +188,8 @@
         this.load.image('particule_sang_2', 'assets/particules/particule_sang_2.png');
         this.load.image('particule_terre_1', 'assets/particules/particule_terre_1.png');
         this.load.image('particule_terre_2', 'assets/particules/particule_terre_2.png');
+        this.load.image('particule_herbe_alien_1', 'assets/particules/particule_herbe_alien_1.png');
+        this.load.image('particule_herbe_alien_2', 'assets/particules/particule_herbe_alien_2.png');
         
     }
 
@@ -170,13 +200,14 @@
    
     function create ()
     {
+
     // - Sky :
         this.add.image(4000, 1080, 'sky');
         
     // - Phisique :   
         platforms = this.physics.add.staticGroup();
         
-        panneaux_text = this.physics.add.sprite(3320,1600, 'panneaux_text');
+        panneaux_text = this.physics.add.sprite(3320,1600, 'panneaux_text').setGravityY(-300);
         
         panneaux_dash = this.physics.add.staticGroup();
         panneaux_jetpack = this.physics.add.staticGroup();
@@ -204,9 +235,16 @@
         platforms.create(4000,-30, 'limiteDeMap');
         platforms.create(4000,2190, 'limiteDeMap');
       
-    // - Barre de vie :    Creation de la barre de vie
-        barreDeVie = this.physics.add.sprite(200,1000, 'vie').setScrollFactor(0,0);
-    
+    // - UI :    Creation des element formant l'UI du jeu
+        
+        barreDeVie = this.physics.add.sprite(200,1000, 'vie').setScrollFactor(0,0).setGravityY(-300);
+        
+        inventaire = this.physics.add.sprite(1820,1000, 'inventaire').setScrollFactor(0,0).setGravityY(-300);
+        
+        
+       // echap = this.physics.add.sprite(50,50, 'echap').setScrollFactor(0,0).setGravityY(-300);
+        
+        
     // - Panneaux :    Creation des panneaux (text, dash, jetpack)
         panneaux_dash.create(3620,1694, 'panneaux_dash');
         panneaux_jetpack.create(3920,1694, 'panneaux_jetpack');
@@ -223,7 +261,7 @@
         
         
     // joueur :  Creation du joeur
-        player = this.physics.add.sprite(3666,1700, 'snail'); //256,1260 spawn   6564,1660 ship
+        player = this.physics.add.sprite(2950,1120, 'snail'); //256,1600 spawn   //6564,1660 ship  //2950,1120 panneaux
         player.setBounce(0.2);
         player.setCollideWorldBounds(false);
         
@@ -233,26 +271,25 @@
         this.cameras.main.setSize(1920, 1080);
         this.cameras.main.setBounds(0,0,8000,2160);
         
-        
-        
     // Cursors :  Creation des cursors pour les controles clavier / manette
         cursors = this.input.keyboard.createCursorKeys();
-
+        
+        
         
     // Affichages Dubug :  Creation des ligne de debug 
-        sautText = this.add.text(20,20,(''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0);
-        doubleJumpText = this.add.text(20,50,(''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0);
+        sautText = this.add.text(100,20,(''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0);
+        doubleJumpText = this.add.text(100,50,(''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0);
         
-        playeryText = this.add.text(20,110, (''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0); 
-        playerxText = this.add.text(20,140, (''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0); 
-        camOffsetYText = this.add.text(20,170,(''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0);
+        playeryText = this.add.text(100,110, (''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0); 
+        playerxText = this.add.text(100,140, (''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0); 
+        camOffsetYText = this.add.text(100,170,(''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0);
         
-        gravText = this.add.text(20,230,(''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0);
-        droiteText = this.add.text(20,260,(''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0);
+        gravText = this.add.text(100,230,(''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0);
+        droiteText = this.add.text(100,260,(''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0);
         
-        vieDuJoueurText = this.add.text(20,320,(''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0);
-        joueurMortTexT = this.add.text(20,350,(''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0);
-        invincibleTexT = this.add.text(20,380,(''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0);
+        vieDuJoueurText = this.add.text(100,320,(''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0);
+        joueurMortTexT = this.add.text(100,350,(''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0);
+        invincibleTexT = this.add.text(100,380,(''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0);
         
         dashTexT = this.add.text(1500,20,(''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0);
         timerDashOnText = this.add.text(1500,50,(''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0);
@@ -260,6 +297,11 @@
         panneaux_text_ontext = this.add.text(1500,110,(''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0);
         timer_panneaux_text_onText = this.add.text(1500,140,(''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0);
         panneaux_arretText = this.add.text(1500,170,(''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0);
+        
+        testtext = this.add.text(1500,200,(''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0);
+        toucheMurtext = this.add.text(1500,260,(''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0);
+        
+    
         
     // Collider et Overlap
         this.physics.add.collider(player, platforms, toucheSol);
@@ -272,6 +314,7 @@
         
         this.physics.add.overlap(panneaux_text, player, ecrire);
         this.physics.add.overlap(panneaux_dash, player, powerupdash);
+        this.physics.add.overlap(panneaux_jetpack, player, powerupjetpack);
         
         
 // Animation -------------------------------------------------
@@ -368,6 +411,25 @@
         });
         
         
+        
+    // animation de l'inventaire ------------------------------      
+        
+        this.anims.create({
+            key: 'inveVide',
+            frames: [ { key: 'inventaire', frame: 0. } ],
+        });
+        
+        this.anims.create({
+            key: 'inveDash',
+            frames: [ { key: 'inventaire', frame: 1. } ],
+        });
+        
+        this.anims.create({
+            key: 'inveJetpack',
+            frames: [ { key: 'inventaire', frame: 2. } ],
+        });
+        
+
     // animation de pouvoir ------------------------------  
         
         this.anims.create({
@@ -379,7 +441,20 @@
             key: 'dashDroit',
             frames: [ { key: 'snail', frame: 5. } ],
         });
-          
+         
+        this.anims.create({
+            key: 'flipdashGauche',
+            frames: [ { key: 'snail', frame: 11. } ],
+        });
+        
+        this.anims.create({
+            key: 'flipdashDroit',
+            frames: [ { key: 'snail', frame: 15. } ],
+        });
+        
+        
+        
+        
     // animation des panneux tutoriel ------------------------------ 
         
         this.anims.create({
@@ -393,6 +468,9 @@
             frames: this.anims.generateFrameNumbers('panneaux_text', { start: 5, end: 10 }),
             frameRate: 20,
         });
+        
+        
+        
         
         
     }
@@ -789,12 +867,13 @@
         
         timerParticules = timerParticules + 1
         
+        if(timerJetpackOn == true){
+            timerJetpack = timerJetpack + 1
+        }
         
 // Barre de Vie 
     //_____________________________________________________________________________      
         
-        
-        barreDeVie.setGravityY(-300);
         if(invincible == true){
             timerInvincible = timerInvincible + 1
             if(timerInvincible >= TempsDinvinciblilite){
@@ -803,10 +882,23 @@
             }
         }  
          
+        
+// Inventaire 
+    //_____________________________________________________________________________      
+        
+        if(inventaireStockage == 0){
+            inventaire.anims.play('inveVide');
+        }
+        else if(inventaireStockage == 1){
+            inventaire.anims.play('inveDash');
+        }
+        else if(inventaireStockage == 2){
+            inventaire.anims.play('inveJetpack');
+        }
+        
 // Panneaux
     //_____________________________________________________________________________       
         
-        panneaux_text.setGravityY(-300);
         if(timer_on_panneaux_text_on == true){
             timer_panneaux_text_on = timer_panneaux_text_on +1
         }     
@@ -833,7 +925,7 @@
             playerxText.setText('x ='+ player.x);
             sautText.setText('Au Sol = ' +toucheLeSol);
             gravText.setText('grav = '+ gravite);
-            droiteText.setText(('Gauche = '+ droite));
+            droiteText.setText('Gauche = '+ droite);
             camOffsetYText.setText('camOffsetY = '+camOffsetY);
             doubleJumpText.setText('Double Saut = ' +doubleJump);
             vieDuJoueurText.setText('Vie = ' +vieDuJoueur);
@@ -844,7 +936,23 @@
             panneaux_text_ontext.setText('ptOn = ' +panneaux_text_on);
             timer_panneaux_text_onText.setText('Timer_ptOn = ' +timer_panneaux_text_on);
             panneaux_arretText.setText('p arret = ' +panneaux_arret);
+            testtext.setText('test = ' +test);
+            toucheMurtext.setText('touche Mure = ' +toucheMur);
+
+            
+            
         }
+        
+// menus :
+    //_____________________________________________________________________________   
+   
+    
+        
+        
+        
+        
+        
+        
 // Gravité
         //__________________________________________________________________________  
         
@@ -906,7 +1014,7 @@
             droite = true
             
         // particules -------------------
-            if(timerParticules == 5 && toucheLeSol == true && timerDashOn == false && timerSpaceShipOn == false){
+            if(timerParticules == 5  && gravite == true && toucheLeSol == true && timerDashOn == false && timerSpaceShipOn == false){
                 
                 randomParticules = Phaser.Math.Between(1, 2)
                 if(randomParticules == 1){
@@ -940,13 +1048,16 @@
             if(gravite == true && droite == true){
                 player.anims.play('turnRight');
             }
+            
             if(gravite == false && droite == true){
                 player.anims.play('turnRightFlip');
             }
             droite = false
             
+            
+            
         // particules -------------------
-            if(timerParticules == 5 && toucheLeSol == true && timerDashOn == false && timerSpaceShipOn == false){
+            if(timerParticules == 5 && gravite == true && toucheLeSol == true && timerDashOn == false && timerSpaceShipOn == false){
                 
                 randomParticules = Phaser.Math.Between(1, 2)
                 if(randomParticules == 1){
@@ -980,6 +1091,10 @@
      
     //Saut  -----------------------------------------------
     
+        
+
+        
+        
         if (cursors.up.isDown && toucheLeSol == true){
             player.setVelocityY(jump);
             toucheLeSol = false
@@ -999,97 +1114,205 @@
 // Pouvoir
         //_____________________________________________________________________________
     
+    // Dash --------------------
+        
         if(dash == true && cursors.space.isDown && cursors.left.isDown){
             timerDashOn = true
             dash = false
+            
+            inventaireStockage = 0
             directionDash = true   
         }  
-        
+
         if(dash == true && cursors.space.isDown && cursors.right.isDown){
             timerDashOn = true
             dash = false
+            inventaireStockage = 0
             directionDash = false    
         } 
         
-        
-        if(directionDash == true){
-            if(timerDashOn == true){
-                droite = true
-                timerDash = timerDash + 1
-                player.anims.play('dashGauche');
-                player.setVelocityX(-1000);
-                
-            // Particules ------
-                if (timerSpaceShipOn == false){
-                    particule = this.physics.add.group({
-                        key: 'particule_energie_1',
-                        setXY: { x: player.x + 27, y: player.y}
-                    }); 
+        if(gravite == true){
+            if(directionDash == true){
+                if(timerDashOn == true){
+                    droite = true
+                    timerDash = timerDash + 1
+                    player.anims.play('dashGauche');
+                    player.setVelocityX(-1000);
 
-                    this.physics.add.collider(particule, platforms, deletParticules);
+                // Particules ------
+                    if (timerSpaceShipOn == false){
+                        particule = this.physics.add.group({
+                            key: 'particule_energie_1',
+                            setXY: { x: player.x + 27, y: player.y}  
+                        }); 
 
-                    particule.setVelocityX(Phaser.Math.Between(-10, -50));
-                    particule.setVelocityY(Phaser.Math.Between(+100, -100));
+                        this.physics.add.collider(particule, platforms, deletParticules);
 
-                    particule = this.physics.add.group({
-                        key: 'particule_energie_2',
-                        setXY: { x: player.x + 27, y: player.y}
-                    });
+                        particule.setVelocityX(Phaser.Math.Between(-10, -50));
+                        particule.setVelocityY(Phaser.Math.Between(+100, -100));
+                        
+                        
+                        particule = this.physics.add.group({
+                            key: 'particule_energie_2',
+                            setXY: { x: player.x + 27, y: player.y}
+                        });
 
-                    this.physics.add.collider(particule, platforms, deletParticules);
+                        this.physics.add.collider(particule, platforms, deletParticules);
 
-                    particule.setVelocityX(Phaser.Math.Between(-10, -50));
-                    particule.setVelocityY(Phaser.Math.Between(+100, -100));
+                        particule.setVelocityX(Phaser.Math.Between(-10, -50));
+                        particule.setVelocityY(Phaser.Math.Between(+100, -100));
+                    }
+
+                // Retour de dash
+                    if(timerDash >= 50){
+                        timerDashOn = false
+                        timerDash = 0
+                        player.anims.play('flipGauche'); 
+
+                    }  
                 }
-                    
-            // Retour de dash
-                if(timerDash >= 50){
-                    timerDashOn = false
-                    timerDash = 0
-                    player.anims.play('flipGauche'); 
-                    
-                }  
+            }
+
+            if(directionDash == false){
+                if(timerDashOn == true){
+                    droite = false
+                    timerDash = timerDash + 1
+                    player.anims.play('dashDroit');
+                    player.setVelocityX(1000);
+
+                // Particules ------
+                    if(timerSpaceShipOn == false){
+                        particule = this.physics.add.group({
+                            key: 'particule_energie_1',
+                            setXY: { x: player.x - 27, y: player.y}
+                        }); 
+
+                        this.physics.add.collider(particule, platforms, deletParticules);
+
+                        particule.setVelocityX(Phaser.Math.Between(10, 50));
+                        particule.setVelocityY(Phaser.Math.Between(+100, -100));
+
+                        particule = this.physics.add.group({
+                            key: 'particule_energie_2',
+                            setXY: { x: player.x - 27, y: player.y}
+                        });
+
+                        this.physics.add.collider(particule, platforms, deletParticules);
+
+                        particule.setVelocityX(Phaser.Math.Between(10, 50));
+                        particule.setVelocityY(Phaser.Math.Between(+100, -100));
+                    }
+
+                // Retour de dash
+                    if(timerDash >= 50){
+                        timerDashOn = false
+                        timerDash = 0
+                        player.anims.play('flipDroit');
+                    }  
+                }
+            }
+        }
+          
+        if(gravite == false){
+            if(directionDash == true){
+                if(timerDashOn == true){
+                    droite = true
+                    timerDash = timerDash + 1
+                    player.anims.play('flipdashGauche');
+                    player.setVelocityX(-1000);
+
+                // Particules ------
+                    if (timerSpaceShipOn == false){
+                        
+                        
+                        particule = this.physics.add.group({
+                            key: 'particule_energie_1',
+                            setXY: { x: player.x + 27, y: player.y}
+                        }); 
+
+                        this.physics.add.collider(particule, platforms, deletParticules);
+                        
+                        particule.setVelocityX(Phaser.Math.Between(10, 50));
+                        particule.setVelocityY(Phaser.Math.Between(+100, -100));
+
+                        particule = this.physics.add.group({
+                            key: 'particule_energie_2',
+                            setXY: { x: player.x + 27, y: player.y}
+                        });
+
+                        this.physics.add.collider(particule, platforms, deletParticules);
+
+                        particule.setVelocityX(Phaser.Math.Between(10, 50));
+                        particule.setVelocityY(Phaser.Math.Between(+100, -100));
+                    }
+
+                // Retour de dash
+                    if(timerDash >= 50){
+                        timerDashOn = false
+                        timerDash = 0
+                        player.anims.play('reflipGauche'); 
+
+                    }  
+                }
+            }
+
+            if(directionDash == false){
+                if(timerDashOn == true){
+                    droite = false
+                    timerDash = timerDash + 1
+                    player.anims.play('flipdashDroit');
+                    player.setVelocityX(1000);
+
+                // Particules ------
+                    if(timerSpaceShipOn == false){
+                        particule = this.physics.add.group({
+                            key: 'particule_energie_1',
+                            setXY: { x: player.x - 27, y: player.y}
+                            
+                        }); 
+
+                        this.physics.add.collider(particule, platforms, deletParticules);
+
+                        particule.setVelocityX(Phaser.Math.Between(-10, -50));
+                        particule.setVelocityY(Phaser.Math.Between(+100, -100));
+
+                        particule = this.physics.add.group({
+                            key: 'particule_energie_2',
+                            setXY: { x: player.x - 27, y: player.y}
+                        });
+
+                        this.physics.add.collider(particule, platforms, deletParticules);
+
+                        particule.setVelocityX(Phaser.Math.Between(10, 50));
+                        particule.setVelocityY(Phaser.Math.Between(+100, -100));
+                    }
+
+                // Retour de dash
+                    if(timerDash >= 50){
+                        timerDashOn = false
+                        timerDash = 0
+                        player.anims.play('reflipDroit');
+                    }  
+                }
             }
         }
         
-        if(directionDash == false){
-            if(timerDashOn == true){
-                droite = false
-                timerDash = timerDash + 1
-                player.anims.play('dashDroit');
-                player.setVelocityX(1000);
-
-            // Particules ------
-                if(timerSpaceShipOn == false){
-                    particule = this.physics.add.group({
-                        key: 'particule_energie_1',
-                        setXY: { x: player.x - 27, y: player.y}
-                    }); 
-
-                    this.physics.add.collider(particule, platforms, deletParticules);
-
-                    particule.setVelocityX(Phaser.Math.Between(10, 50));
-                    particule.setVelocityY(Phaser.Math.Between(+100, -100));
-
-                    particule = this.physics.add.group({
-                        key: 'particule_energie_2',
-                        setXY: { x: player.x - 27, y: player.y}
-                    });
-
-                    this.physics.add.collider(particule, platforms, deletParticules);
-
-                    particule.setVelocityX(Phaser.Math.Between(10, 50));
-                    particule.setVelocityY(Phaser.Math.Between(+100, -100));
-                }
-                    
-            // Retour de dash
-                if(timerDash >= 50){
-                    timerDashOn = false
-                    timerDash = 0
-                    player.anims.play('flipDroit');
-                }  
-            }
+        
+    // Jetpack --------------------
+        
+        if(jetpack == true && cursors.space.isDown){
+            inventaireStockage = 0
+            timerJetpackOn = true
+            player.setGravityY(-300)
+            
         }
+        
+        if(timerJetpack >= 300){
+            jetpack = false
+            player.setGravityY(300)
+        }
+        
+        
         
         
         
@@ -1102,14 +1325,27 @@
 
     
     function toucheSol (player, platforms)
-    {
-        toucheLeSol = true
-        doubleJump = false
-        finDoubleJump = false
+    {   
+        if(player.body.touching.left){
+            toucheMur = true
+        }
+        else if (player.body.touching.right){
+            toucheMur = true
+        }
+        else{
+            toucheLeSol = true
+            doubleJump = false
+            finDoubleJump = false
+        }
+            
+        
+            
         if(player.y > 2130 || player.y < 30){
             joueurMort = true
         }
     }
+    
+    
     
     function sortieDeNiveau (player, spaceShip)
     {
@@ -1125,6 +1361,8 @@
         
     }
       
+    
+    
     function ecrire (panneaux_text, player)
     {
         
@@ -1141,14 +1379,31 @@
             
     }
     
+    
+    
     function deletParticules (particule, platforms)
     {
         particule.disableBody(true, true);
     }
     
-    function powerupdash (player, panneaux_dash){
+    
+    
+    function powerupdash (player, panneaux_dash)
+    {
         dash = true
+        jetpack = false
+        inventaireStockage = 1
     }
+    
+
+    function powerupjetpack (player, panneaux_jetpack)
+    {
+        jetpack = true
+        dash = false
+        inventaireStockage = 2
+    }
+    
+    
     
     function contacte (ennemi, player)
     {
