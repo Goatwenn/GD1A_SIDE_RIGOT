@@ -1467,7 +1467,7 @@
         //_____________________________________________________________________________
         
     // Gauche -------------------------
-        if (cursors.left.isDown || pad.left )  {
+        if (cursors.left.isDown || xAxis > 0 )  {
             player.setVelocityX(-deplacement);
             
             if(gravite == true && droite == false){
@@ -1507,7 +1507,7 @@
         }
         
     //Droite --------------------------
-        else if (cursors.right.isDown || pad.right){
+        else if (cursors.right.isDown || xAxis < 0){
             player.setVelocityX(deplacement);
             
             if(gravite == true && droite == true){
@@ -1558,7 +1558,7 @@
         
     
         
-        if (cursors.up.isDown && timerJetpackOn == false &&toucheLeSol == true){
+        if (cursors.up.isDown || pad.A && timerJetpackOn == false &&toucheLeSol == true){
             player.setVelocityY(jump);
             toucheLeSol = false
         }
@@ -1567,7 +1567,7 @@
             doubleJump = true
         }
         
-        if (cursors.up.isDown && doubleJump == true){
+        if (cursors.up.isDown || pad.A && doubleJump == true){
             player.setVelocityY(jump);
             finDoubleJump = true
             doubleJump = false
@@ -1579,7 +1579,7 @@
     
     // Dash --------------------
         
-        if(dash == true && cursors.space.isDown && cursors.left.isDown){
+        if(dash == true && cursors.space.isDown || pad.L1 && cursors.left.isDown){
             timerDashOn = true
             dash = false
             
@@ -1587,7 +1587,7 @@
             directionDash = true   
         }  
 
-        if(dash == true && cursors.space.isDown && cursors.right.isDown){
+        if(dash == true && cursors.space.isDown || pad.L1 && cursors.right.isDown){
             timerDashOn = true
             dash = false
             inventaireStockage = 0
@@ -1761,17 +1761,17 @@
         
     // Jetpack --------------------
         
-        if(jetpack == true && cursors.space.isDown){
+        if(jetpack == true && cursors.space.isDown || pad.L1){
             
             timerJetpackOn = true
             player.setGravityY(-300)
             
         }
         
-        if( timerJetpackOn == true && cursors.up.isDown ){
+        if( timerJetpackOn == true && cursors.up.isDown || yAxis < 0 ){
             player.setVelocityY(-deplacement)
         }
-        else if ( timerJetpackOn == true && cursors.down.isDown ){
+        else if ( timerJetpackOn == true && cursors.down.isDown || yAxis > 0 ){
             player.setVelocityY(deplacement)
         }
         else if (timerJetpackOn == true){
