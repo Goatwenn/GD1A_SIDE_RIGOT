@@ -28,6 +28,7 @@
             }
             
         },
+        input: {gamepad : true},
         scene: {
             preload: preload,
             create: create,
@@ -46,6 +47,9 @@
 
     var debugInfo = false;
     var metaUi ; 
+    
+    var xAxis = 0;
+    var yAxis = 0;
     
     var ennemi;
     var ennemiMort = false;
@@ -725,9 +729,15 @@
 //________________________________________________________________________________________________________
     function update ()
     {  
-         ennemi.setVelocityX(0);
+        
+        let pad = Phaser.Input.Gamepad.Gamepad;
 
-     
+        if(this.input.gamepad.total){
+            pad = this.input.gamepad.getPad(0)
+            xAxis = pad ? pad.axes[0].getValue() : 0;
+            yAxis = pad ? pad.axes[1].getValue() : 0;
+        }
+
 // Ennemit
         ennemiRandownTimer = ennemiRandownTimer + 1
         if (ennemiRandownTimer == 50){
@@ -1457,7 +1467,7 @@
         //_____________________________________________________________________________
         
     // Gauche -------------------------
-        if (cursors.left.isDown )  {
+        if (cursors.left.isDown || pad.left )  {
             player.setVelocityX(-deplacement);
             
             if(gravite == true && droite == false){
@@ -1497,7 +1507,7 @@
         }
         
     //Droite --------------------------
-        else if (cursors.right.isDown){
+        else if (cursors.right.isDown || pad.right){
             player.setVelocityX(deplacement);
             
             if(gravite == true && droite == true){
@@ -1839,6 +1849,10 @@
         if(player.y > 2130 || player.y < 30){
             joueurMort = true
             barreDeVie.anims.play('mort');
+            vieDuJoueur <= 0
+            metaUi2.anims.play('metaMort');
+            metaUi3.setVelocityY(600)
+            joueurMortTimerOn = true
         }
     }
     
