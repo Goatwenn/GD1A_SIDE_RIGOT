@@ -44,7 +44,7 @@
     var platforms;
     var cursors;
 
-    var debugInfo = true;
+    var debugInfo = false;
     var metaUi ; 
     
     var ennemi;
@@ -316,7 +316,7 @@
         ennemi = this.physics.add.sprite(6764,1630, 'ennemi');
         
     // joueur :  Creation du joeur
-        player = this.physics.add.sprite(6564,1660, 'snail'); //256,1600 spawn   //6564,1660 ship  //2950,1120 panneaux
+        player = this.physics.add.sprite(256,1600, 'snail'); //256,1600 spawn   //6564,1660 ship  //2950,1120 panneaux
         player.setBounce(0.2);
         player.setCollideWorldBounds(false);
         
