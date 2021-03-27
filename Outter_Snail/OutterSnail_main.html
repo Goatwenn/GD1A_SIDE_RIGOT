@@ -229,10 +229,6 @@
         this.load.image('particule_herbe_2', 'assets/particules/particule_herbe_2.png');
         this.load.image('particule_sang_1', 'assets/particules/particule_sang_1.png');
         this.load.image('particule_sang_2', 'assets/particules/particule_sang_2.png');
-        this.load.image('particule_terre_1', 'assets/particules/particule_terre_1.png');
-        this.load.image('particule_terre_2', 'assets/particules/particule_terre_2.png');
-        this.load.image('particule_herbe_alien_1', 'assets/particules/particule_herbe_alien_1.png');
-        this.load.image('particule_herbe_alien_2', 'assets/particules/particule_herbe_alien_2.png');
         
     }
 
@@ -1194,15 +1190,7 @@
             particule.setVelocityY(Phaser.Math.Between(+100, -100));
             
         }
-        
- 
-// Timer 
-    //_____________________________________________________________________________      
-        
-        timerParticules = timerParticules + 1
-        
-
-        
+   
 // Barre de Vie 
     //_____________________________________________________________________________      
         
@@ -1466,8 +1454,10 @@
 // Deplacement
         //_____________________________________________________________________________
         
+        timerParticules = timerParticules + 1
+        
     // Gauche -------------------------
-        if (cursors.left.isDown || xAxis > 0 )  {
+        if (cursors.left.isDown || xAxis < 0 )  {
             player.setVelocityX(-deplacement);
             
             if(gravite == true && droite == false){
@@ -1507,7 +1497,7 @@
         }
         
     //Droite --------------------------
-        else if (cursors.right.isDown || xAxis < 0){
+        else if (cursors.right.isDown || xAxis > 0){
             player.setVelocityX(deplacement);
             
             if(gravite == true && droite == true){
@@ -1563,11 +1553,11 @@
             toucheLeSol = false
         }
         
-        if (cursors.up.isUp && toucheLeSol == false && finDoubleJump == false || pad.A && toucheLeSol == false && finDoubleJump == false){
+        if (cursors.up.isUp && toucheLeSol == false && finDoubleJump == false ){
             doubleJump = true
         }
         
-        if (cursors.up.isDown && doubleJump == true){
+        if (cursors.up.isDown && doubleJump == true || pad.A && doubleJump == true){
             player.setVelocityY(jump);
             finDoubleJump = true
             doubleJump = false
