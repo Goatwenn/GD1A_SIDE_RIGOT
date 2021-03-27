@@ -44,10 +44,16 @@
     var platforms;
     var cursors;
 
-    var debugInfo = false;
+    var debugInfo = true;
+    var metaUi ; 
     
     var ennemi;
     var ennemiMort = false;
+    var ennemiRandown = 1;
+    var ennemiRandownTimer = 0;
+    var ennemiDroit = true;
+    var ennemiRandownGrate = 0;
+    var ennemiAnimeVerif = false;
     
   // SpaceShip ------------------   
     var spaceShip;
@@ -74,6 +80,8 @@
     var vieDuJoueur = 3;        // Donne l'etat de la barre de vie ( 3 = 3 coeur, 2 = 2 coeur, ect...).
     var barreDeVie;              // Game object de la barre de vie.
     var joueurMort = false;     // Donne la mort du joueur.
+    var joueurMortTimer = 0
+    var joueurMortTimerOn = false;
     var invincible = false;     // Active la frame D'invinciblilité.
     var timerInvincible = 0;    // Timer de l'invincibilité
     
@@ -180,10 +188,14 @@
         this.load.spritesheet('spaceShip', 'assets/spaceShip.png',{frameWidth:726, frameHeight:126});
         this.load.spritesheet('vie', 'assets/barreDeVie.png',{frameWidth:218, frameHeight:54});
         
+    // Meta Ui    
+        this.load.spritesheet('meta','assets/metaUI.png',{frameWidth:1920, frameHeight:1080});
+        this.load.spritesheet('meta2','assets/metaUI2.png',{frameWidth:1920, frameHeight:1080});
+        this.load.image('meta3','assets/metaUI3.png');
         
     // Fruit   
         this.load.image('fruit', 'assets/fruit.png');
-        this.load.image('fruitflip', 'assets/fruitFlip.png');
+        this.load.image('fruitFlip', 'assets/fruitflip.png');
         this.load.spritesheet('compteurDeFruit', 'assets/compteurDeFruit.png',{frameWidth:192, frameHeight:78});
         
     // Panneaux
@@ -198,11 +210,9 @@
         
     // Personage
         this.load.spritesheet('snail', 'assets/snail.png',{frameWidth:108, frameHeight:54});
-        this.load.image('ennemi', 'assets/ennemit.png');
+        this.load.spritesheet('ennemi', 'assets/ennemit.png',{frameWidth:82, frameHeight:147});
     
-    // UI  
-        this.load.image('menuPause', 'assets/menus/menusPause.png');
-        this.load.spritesheet('echap', 'assets/touches/echap.png',{frameWidth:76, frameHeight:76});
+    // IInventaire
         this.load.spritesheet('inventaire', 'assets/inventaire.png',{frameWidth:100, frameHeight:100});
     
         
@@ -276,7 +286,7 @@
         panneauxtext2 = this.physics.add.sprite(1680,1240, 'panneaux_text');
         panneauxtext2.body.setAllowGravity(false);
         
-        panneauxtext3 = this.physics.add.sprite(2340,900, 'panneaux_text_3');
+        panneauxtext3 = this.physics.add.sprite(2340,1000, 'panneaux_text_3');
         panneauxtext3.body.setAllowGravity(false);
         
         panneauxtext4 = this.physics.add.sprite(2620,1600, 'panneaux_text');
@@ -303,10 +313,10 @@
         spaceShip = this.physics.add.sprite(7564,1660, 'spaceShip');
         
     //ennemi  Creation d'un ennemi
-        ennemi = this.physics.add.sprite(6764,1460, 'ennemi');
+        ennemi = this.physics.add.sprite(6764,1630, 'ennemi');
         
     // joueur :  Creation du joeur
-        player = this.physics.add.sprite(2950,1120, 'snail'); //256,1600 spawn   //6564,1660 ship  //2950,1120 panneaux
+        player = this.physics.add.sprite(6564,1660, 'snail'); //256,1600 spawn   //6564,1660 ship  //2950,1120 panneaux
         player.setBounce(0.2);
         player.setCollideWorldBounds(false);
         
@@ -341,8 +351,16 @@
         inventaire.body.setAllowGravity(false);
              
         
+    // - Meta UI : 
+      
+        metaUi = this.physics.add.sprite(960,540, 'meta2').setScrollFactor(0,0);     
+        metaUi.body.setAllowGravity(false);
         
+        metaUi2 = this.physics.add.sprite(960,540, 'meta2').setScrollFactor(0,0);     
+        metaUi2.body.setAllowGravity(false);
         
+        metaUi3 = this.physics.add.image(960,-1620, 'meta3').setScrollFactor(0,0);     
+        metaUi3.body.setAllowGravity(false);
         
     // Affichages Dubug :  Creation des ligne de debug 
         
@@ -590,7 +608,7 @@
         
          this.anims.create({
             key: 'panneaux_text_4_ecrire',
-            frames: this.anims.generateFrameNumbers('panneaux_text', { start: 32, end: 37 }),
+            frames: this.anims.generateFrameNumbers('panneaux_text', { start: 33, end: 38 }),
             frameRate: 20,
         });
         
@@ -623,9 +641,84 @@
             frames: this.anims.generateFrameNumbers('panneaux_text', { start: 60, end: 65 }),
             frameRate: 20,
         });
-    }
+        
+    // animation Meta UI ------------------------------  
+        
+        this.anims.create({
+            key: 'metaBlood',
+            frames: this.anims.generateFrameNumbers('meta', { start: 0, end: 7 }),
+            frameRate: 10,
+            repeat: 2 ,
+        });
+    
+        
+        this.anims.create({
+            key: 'metaFull',
+            frames: [ { key: 'meta2', frame: 0. } ],
+        });
+        
+        this.anims.create({
+            key: 'metaMid',
+            frames: [ { key: 'meta2', frame: 1. } ],
+        });
+        
+        this.anims.create({
+            key: 'metaLow',
+            frames: [ { key: 'meta2', frame: 2. } ],
+        });
   
-
+        this.anims.create({
+            key: 'metaMort',
+            frames: [ { key: 'meta2', frame: 3. } ],
+        });
+        
+        this.anims.create({
+            key: 'metaGameOver',
+            frames: [ { key: 'meta2', frame: 4. } ],
+        });
+        
+   // animation de ennemi ------------------------------ 
+    
+        this.anims.create({
+            key: 'ennemiGauche',
+            frames: this.anims.generateFrameNumbers('ennemi', { start: 1, end: 4 }),
+            frameRate: 10,
+            repeat: -1 ,
+        });
+        
+        this.anims.create({
+            key: 'ennemiDroit',
+            frames: this.anims.generateFrameNumbers('ennemi', { start: 6, end: 9 }),
+            frameRate: 10,
+            repeat: -1 ,
+        });
+    
+        this.anims.create({
+            key: 'ennemiGrateDroit',
+            frames: this.anims.generateFrameNumbers('ennemi', { start: 10, end: 14 }),
+            frameRate: 10,
+            repeat: -1 ,
+        });
+        
+        this.anims.create({
+            key: 'ennemiGrateGauche',
+            frames: this.anims.generateFrameNumbers('ennemi', { start: 15, end: 19 }),
+            frameRate: 10,
+            repeat: -1 ,
+        });
+        
+        this.anims.create({
+            key: 'ennemiStopDroit',
+            frames: [ { key: 'ennemi', frame: 5. } ],
+        });
+        
+        this.anims.create({
+            key: 'ennemiStopGauche',
+            frames: [ { key: 'ennemi', frame: 0. } ],
+        });
+    }
+    
+    
     
     
 //__ Fonction Update _____________________________________________________________________________________
@@ -634,9 +727,87 @@
     {  
          ennemi.setVelocityX(0);
 
+     
+// Ennemit
+        ennemiRandownTimer = ennemiRandownTimer + 1
+        if (ennemiRandownTimer == 50){
+            ennemiRandownTimer = 0
+            ennemiRandown = Phaser.Math.Between(1, 3)
+        }
+        
+        if(ennemiRandown == 1) {
+            ennemiDroit = true
+            ennemiAnimeVerif = true
+            
+            if (ennemi.x >= 7000){
+                ennemi.setVelocityX(0)
+                ennemi.anims.play('ennemiStopDroit', true);
+            }
+            else {
+                ennemi.setVelocityX(150)
+                ennemi.anims.play('ennemiDroit', true);
+            }
+        } 
+        
+        if(ennemiRandown == 2 ) {
+            ennemiDroit = false
+            ennemiAnimeVerif = true
+            
+            if(ennemi.x <= 6230){
+                ennemi.setVelocityX(0)
+                ennemi.anims.play('ennemiStopGauche', true);
+            }
+            else{
+            ennemi.setVelocityX(-150)
+            ennemi.anims.play('ennemiGauche', true);
+            } 
+        } 
+        
+        if(ennemiRandown == 3 && ennemiAnimeVerif == true) {
+            ennemiRandownGrate = Phaser.Math.Between(1, 4)
+            ennemi.setVelocityX(0)
+            ennemiAnimeVerif = false
+            
+            if(ennemiRandownGrate <=3) {
+                if (ennemiDroit == true){
+                    ennemi.anims.play('ennemiStopDroit', true);
+                }
+                if (ennemiDroit == false){
+                    ennemi.anims.play('ennemiStopGauche', true);
+                }
+            }
+            
+            if(ennemiRandownGrate ==4){
+                if (ennemiDroit == true){
+                    ennemi.anims.play('ennemiGrateDroit', true);
+                }
+                if (ennemiDroit == false){
+                    ennemi.anims.play('ennemiGrateGauche', true);
+                }
+            }
+            
+            
+        }
+    
+    
         
 // Mort du joueur ou d'un ennemi 
-    //_____________________________________________________________________________        
+    //_____________________________________________________________________________  
+        
+        if(metaUi3.y == -2700){
+            metaUi3.setVelocityY(0)
+               
+        }
+        
+        if(joueurMortTimerOn == true){
+            joueurMortTimer = joueurMortTimer +1
+            if(joueurMortTimer == 200){
+                joueurMortTimerOn = false
+                metaUi2.anims.play('metaGameOver');
+            }
+        }
+        
+        
         if(ennemiMort == true){
             
             ennemiMort = false
@@ -805,9 +976,9 @@
         }
             
         if(joueurMort == true){ 
-        
-            player.disableBody(true, true);
+    
             joueurMort = false
+            player.disableBody(true, true);
         // particules -------------------
             particule = this.physics.add.group({
                 key: 'particule_sang_1',
@@ -1221,7 +1392,7 @@
             info3text.setText('Pouvoir du joueur :');
             dashTexT.setText('Dash = ' +dash);
             timerDashOnText.setText('TimerDashOn = ' +timerDashOn);
-            testtext.setText('test = ' +test);
+            testtext.setText('test = ' +metaUi3.x);
            
             jetpacktext.setText('Jetpack = ' +jetpack);
             timerJetpacktext.setText('Durée de vol = ' +timerJetpack);
@@ -1776,18 +1947,27 @@
         
         if(vieDuJoueur == 3){
             barreDeVie.anims.play('enVie');
+            metaUi2.anims.play('metaFull');
+            
         }
         
         else if (vieDuJoueur == 2){
             barreDeVie.anims.play('blesser');
+            metaUi.anims.play('metaBlood');
+            metaUi2.anims.play('metaMid');
         }
         
         else if (vieDuJoueur == 1){
             barreDeVie.anims.play('critique');
+            metaUi.anims.play('metaBlood');
+            metaUi2.anims.play('metaLow');
         }
         
         else if (vieDuJoueur <= 0){
             barreDeVie.anims.play('mort');
+            metaUi2.anims.play('metaMort');
+            metaUi3.setVelocityY(600)
+            joueurMortTimerOn = true
             joueurMort = true
         } 
     }
