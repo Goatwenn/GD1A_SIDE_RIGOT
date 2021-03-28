@@ -123,6 +123,10 @@
     var panneauxText6ONTimer =0;
     var panneauxText6AnimeOpen = 0;
     
+    var panneauxText7ON = false;
+    var panneauxText7ONTimer =0;
+    var panneauxText7AnimeOpen = 0;
+    
   // Pouvoir ------------------  
     
     var inventaire;             // Game object de l'inventaire.
@@ -298,6 +302,9 @@
         panneauxtext6 = this.physics.add.sprite(6050,1597, 'panneaux_text');
         panneauxtext6.body.setAllowGravity(false);
 
+        panneauxtext7 = this.physics.add.sprite(6050,1597, 'panneaux_text');
+        panneauxtext7.body.setAllowGravity(false);
+        
     // - Panneaux :    Creation des panneaux (text, dash, jetpack)
         
         panneaux_dash = this.physics.add.staticGroup();
@@ -311,12 +318,13 @@
         
     //Space Ship (sortie de niveaux)  Creation de la sortie de niveau 
         spaceShip = this.physics.add.sprite(7564,1660, 'spaceShip');
+        spaceShip.setSize(500,126)
         
     //ennemi  Creation d'un ennemi
         ennemi = this.physics.add.sprite(6764,1630, 'ennemi');
         
     // joueur :  Creation du joeur
-        player = this.physics.add.sprite(256,1600, 'snail'); //256,1600 spawn   //6564,1660 ship  //2950,1120 panneaux
+        player = this.physics.add.sprite(6564,1660, 'snail'); //256,1600 spawn   //6564,1660 ship  //2950,1120 panneaux
         player.setBounce(0.2);
         player.setCollideWorldBounds(false);
         
@@ -328,7 +336,6 @@
         
     // Cursors :  Creation des cursors pour les controles clavier / manette
         cursors = this.input.keyboard.createCursorKeys();
-        
  
     // Fruit :   Creation d'un fruit
       
@@ -337,7 +344,7 @@
         
         fruit.create(1800,1910, 'fruit');
         fruit.create(256,542, 'fruitFlip');
-        fruit.create(6000,1200, 'fruit');
+        fruit.create(6764,1630, 'fruit');
 
         compteurDeFruit = this.physics.add.sprite(1650,1000, 'compteurDeFruit').setScrollFactor(0,0);
         compteurDeFruit.body.setAllowGravity(false);
@@ -398,7 +405,7 @@
         this.physics.add.collider(spaceShip, platforms);
         this.physics.add.overlap(player, spaceShip, sortieDeNiveau);
         
-        this.physics.add.collider(ennemi, platforms);
+        this.physics.add.collider(ennemi, platforms, ennemiToucheSol);
         this.physics.add.collider(ennemi, player, contacte);
         
         this.physics.add.overlap(panneauxtext1, player, ecrire1);
@@ -608,39 +615,52 @@
         
          this.anims.create({
             key: 'panneaux_text_4_ecrire',
-            frames: this.anims.generateFrameNumbers('panneaux_text', { start: 33, end: 38 }),
+            frames: this.anims.generateFrameNumbers('panneaux_text', { start: 22, end: 27 }),
             frameRate: 20,
         });
         
         this.anims.create({
             key: 'panneaux_text_4_effacer',
-            frames: this.anims.generateFrameNumbers('panneaux_text', { start: 38, end: 43 }),
+            frames: this.anims.generateFrameNumbers('panneaux_text', { start: 27, end: 32 }),
             frameRate: 20,
         });
         
         this.anims.create({
             key: 'panneaux_text_5_ecrire',
-            frames: this.anims.generateFrameNumbers('panneaux_text', { start: 44, end: 49 }),
+            frames: this.anims.generateFrameNumbers('panneaux_text', { start: 33, end: 38 }),
             frameRate: 20,
         });
         
         this.anims.create({
             key: 'panneaux_text_5_effacer',
-            frames: this.anims.generateFrameNumbers('panneaux_text', { start: 49, end: 54 }),
+            frames: this.anims.generateFrameNumbers('panneaux_text', { start: 38, end: 43 }),
             frameRate: 20,
         });
         
         this.anims.create({
             key: 'panneaux_text_6_ecrire',
-            frames: this.anims.generateFrameNumbers('panneaux_text', { start: 55, end: 60 }),
+            frames: this.anims.generateFrameNumbers('panneaux_text', { start: 44, end: 49 }),
             frameRate: 20,
         });
         
         this.anims.create({
             key: 'panneaux_text_6_effacer',
+            frames: this.anims.generateFrameNumbers('panneaux_text', { start: 49, end: 54 }),
+            frameRate: 20,
+        });
+        
+        this.anims.create({
+            key: 'panneaux_text_7_ecrire',
+            frames: this.anims.generateFrameNumbers('panneaux_text', { start: 55, end: 60 }),
+            frameRate: 20,
+        });
+        
+        this.anims.create({
+            key: 'panneaux_text_7_effacer',
             frames: this.anims.generateFrameNumbers('panneaux_text', { start: 60, end: 65 }),
             frameRate: 20,
         });
+        
         
     // animation Meta UI ------------------------------  
         
@@ -1846,19 +1866,27 @@
         }
     }
     
+    function ennemiToucheSol (ennemi, platforms)
+    {   
+     
+        if(ennemi.y > 2130 || ennemi.y < 30){
+            ennemiMort = true
+        }
+    }
+    
     
     
     function sortieDeNiveau (player, spaceShip)
     {
+        if (fruitStockage == 3){
+            player.disableBody(true, true);
+            spaceShip.anims.play('sortie');
         
-        player.disableBody(true, true);
-        spaceShip.anims.play('sortie');
-        
-        timerSpaceShipOn = true
-        
-        spaceShip.setGravityY(-300);
-        spaceShip.setVelocityY(-200);
-        
+            timerSpaceShipOn = true
+           
+            spaceShip.setGravityY(-300);
+            spaceShip.setVelocityY(-200);
+        }
         
     }
       
@@ -1866,7 +1894,7 @@
     
     function deletParticules (particule, platforms)
     {
-        particule.disableBody(true, true);
+        particule.destroy();
     }
     
     
