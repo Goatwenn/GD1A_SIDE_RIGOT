@@ -1568,9 +1568,13 @@
     //Saut  -----------------------------------------------
         
     
-        if(pad.A){
+        if(pad.A || cursors.up.isDown){
             toucheA = true
         }
+        else if(cursors.up.isDown){
+            toucheA = false
+        }
+        
         else {
             toucheA = false
         }
