@@ -46,7 +46,7 @@
     var cursors;
     var toucheA = false;
     
-    var debugInfo = true;
+    var debugInfo = false;
     var metaUi ; 
     
     var xAxis = 0;
@@ -303,7 +303,7 @@
         panneauxtext6 = this.physics.add.sprite(6050,1597, 'panneaux_text');
         panneauxtext6.body.setAllowGravity(false);
 
-        panneauxtext7 = this.physics.add.sprite(6050,1597, 'panneaux_text');
+        panneauxtext7 = this.physics.add.sprite(7150,1597, 'panneaux_text');
         panneauxtext7.body.setAllowGravity(false);
         
     // - Panneaux :    Creation des panneaux (text, dash, jetpack)
@@ -325,7 +325,7 @@
         ennemi = this.physics.add.sprite(6764,1630, 'ennemi');
         
     // joueur :  Creation du joeur
-        player = this.physics.add.sprite(6564,1660, 'snail'); //256,1600 spawn   //6564,1660 ship  //2950,1120 panneaux
+        player = this.physics.add.sprite(256,1600, 'snail'); //256,1600 spawn   //6564,1660 ship  //2950,1120 panneaux
         player.setBounce(0.2);
         player.setCollideWorldBounds(false);
         
@@ -415,6 +415,7 @@
         this.physics.add.overlap(panneauxtext4, player, ecrire4);
         this.physics.add.overlap(panneauxtext5, player, ecrire5);
         this.physics.add.overlap(panneauxtext6, player, ecrire6);
+        this.physics.add.overlap(panneauxtext7, player, ecrire7);
         
         this.physics.add.overlap(panneaux_dash, player, powerupdash);
         this.physics.add.overlap(panneaux_jetpack, player, powerupjetpack);
@@ -1380,6 +1381,27 @@
             }
         } 
         
+        if(panneauxText7ON == true){
+            panneauxText7ONTimer = panneauxText7ONTimer +1
+            panneauxText7AnimeOpen = panneauxText7AnimeOpen +1
+            
+            
+            if(panneauxText7AnimeOpen == 5 ){
+                panneauxtext7.anims.play('panneaux_text_7_ecrire');
+            }
+            
+         
+            if(panneauxText6ONTimer >= 20){
+                
+                if(player.x < 6895 || player.x > 7405){
+                    panneauxText7ON = false
+                    panneauxText7AnimeOpen = 0
+                    panneauxtext7.anims.play('panneaux_text_7_effacer') 
+                }
+                
+                panneauxText7ONTimer = 0
+            }
+        }
         
 // Cam 
     //_____________________________________________________________________________
@@ -1578,10 +1600,6 @@
         else {
             toucheA = false
         }
-        
-        
-        
-        
         
         if (toucheA == true && timerJetpackOn == false &&toucheLeSol){
             player.setVelocityY(jump);
@@ -1975,6 +1993,12 @@
         
     }
     
+    function ecrire7 (panneauxtext7, player)
+    {
+        
+        panneauxText7ON = true 
+        
+    }
     
     function contacte (ennemi, player)
     {
