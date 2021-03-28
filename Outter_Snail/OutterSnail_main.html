@@ -1579,16 +1579,16 @@
         
         
         
-        if (cursors.up.isDown && timerJetpackOn == false &&toucheLeSol == true || toucheA == true && timerJetpackOn == false &&toucheLeSol){
+        if (toucheA == true && timerJetpackOn == false &&toucheLeSol){
             player.setVelocityY(jump);
             toucheLeSol = false
         }
         
-        if (cursors.up.isUp && toucheLeSol == false && finDoubleJump == false || toucheA == false && toucheLeSol == false && finDoubleJump == false){
+        if (toucheA == false && toucheLeSol == false && finDoubleJump == false){
             doubleJump = true
         }
         
-        if (cursors.up.isDown && doubleJump == true || toucheA == true && doubleJump == true){
+        if (toucheA == true && doubleJump == true){
             player.setVelocityY(jump);
             finDoubleJump = true
             doubleJump = false
